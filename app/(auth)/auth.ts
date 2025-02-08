@@ -1,3 +1,6 @@
+export const runtime = 'nodejs';
+
+
 import NextAuth from "next-auth";
 import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
