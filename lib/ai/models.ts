@@ -1,28 +1,38 @@
-import { openai } from '@ai-sdk/openai';
-import { fireworks } from '@ai-sdk/fireworks';
+import { createAzure } from "@ai-sdk/azure";
 import {
   customProvider,
   extractReasoningMiddleware,
   wrapLanguageModel,
-} from 'ai';
+} from "ai";
 
-export const DEFAULT_CHAT_MODEL: string = 'chat-model-small';
+// Set the default chat model to "o1"
+export const DEFAULT_CHAT_MODEL: string = "o3-mini-low";
+
+// Create an Azure instance. Adjust apiVersion and environment variables as needed.
+const azure = createAzure({
+  resourceName: process.env.NEXT_PUBLIC_AZURE_RESOURCE_NAME || "",
+  apiKey: process.env.NEXT_PUBLIC_AZURE_API_KEY || "",
+  apiVersion: "2024-12-01-preview",
+});
 
 export const myProvider = customProvider({
   languageModels: {
-    'chat-model-small': openai('gpt-4o-mini'),
-    'chat-model-large': openai('gpt-4o'),
-    'chat-model-reasoning': wrapLanguageModel({
-      model: fireworks('accounts/fireworks/models/deepseek-r1'),
-      middleware: extractReasoningMiddleware({ tagName: 'think' }),
+    // Primary models using the actual names
+    "o1": azure("o1"),
+    "o3-mini-low": azure("o3-mini", {
+      providerOptions: { azure: { reasoningEffort: "low" } }
     }),
-    'title-model': openai('gpt-4-turbo'),
-    'block-model': openai('gpt-4o-mini'),
+    "o3-mini-high": azure("o3-mini", {
+      providerOptions: { azure: { reasoningEffort: "high" } }
+    }),
+    // Downstream models that remain unchanged
+    "title-model": azure("o1-mini"),
+    "block-model": azure("o1-mini")
   },
-  imageModels: {
-    'small-model': openai.image('dall-e-2'),
-    'large-model': openai.image('dall-e-3'),
-  },
+  // imageModels: {
+  //   "small-model": azure.image("dall-e-2"),
+  //   "large-model": azure.image("dall-e-3"),
+  // },
 });
 
 interface ChatModel {
@@ -33,18 +43,18 @@ interface ChatModel {
 
 export const chatModels: Array<ChatModel> = [
   {
-    id: 'chat-model-small',
-    name: 'Small model',
-    description: 'Small model for fast, lightweight tasks',
+    id: "o1",
+    name: "O1",
+    description: "The primary model (o1) for general-purpose tasks.",
   },
   {
-    id: 'chat-model-large',
-    name: 'Large model',
-    description: 'Large model for complex, multi-step tasks',
+    id: "o3-mini-low",
+    name: "O3-Mini (Low)",
+    description: "A lightweight model with low reasoning effort.",
   },
   {
-    id: 'chat-model-reasoning',
-    name: 'Reasoning model',
-    description: 'Uses advanced reasoning',
+    id: "o3-mini-high",
+    name: "O3-Mini (High)",
+    description: "A model with high reasoning effort for more complex tasks.",
   },
 ];
