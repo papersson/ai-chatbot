@@ -49,28 +49,6 @@ export const account = pgTable(
   })
 );
 
-export const session = pgTable('session', {
-  sessionToken: text('sessionToken').primaryKey(),
-  userId: text('userId')
-    .notNull()
-    .references(() => user.id, { onDelete: 'cascade' }),
-  expires: timestamp('expires', { mode: 'date' }).notNull(),
-});
-
-export const verificationToken = pgTable(
-  'verification_token',
-  {
-    identifier: text('identifier').notNull(),
-    token: text('token').notNull(),
-    expires: timestamp('expires', { mode: 'date' }).notNull(),
-  },
-  (vt) => ({
-    compoundKey: primaryKey({
-      columns: [vt.identifier, vt.token],
-    }),
-  })
-);
-
 export const chat = pgTable('chat', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
   createdAt: timestamp('createdAt').notNull(),
