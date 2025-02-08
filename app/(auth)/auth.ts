@@ -15,8 +15,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_ID!,
       clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET!,
       issuer: process.env.AUTH_MICROSOFT_ENTRA_ID_ISSUER,
-      // Add this if you need to request specific scopes
-      // authorization: { params: { scope: "openid profile email" } },
     }),
   ],
   session: {
