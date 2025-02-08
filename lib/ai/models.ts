@@ -25,9 +25,11 @@ export const myProvider = customProvider({
     "o3-mini-high": azure("o3-mini", {
       providerOptions: { azure: { reasoningEffort: "high" } }
     }),
+    "gpt-4o-mini": azure("gpt-4o-mini"),
+    "gpt-4o": azure("gpt-4o"),
     // Downstream models that remain unchanged
-    "title-model": azure("o1-mini"),
-    "block-model": azure("o1-mini")
+    "title-model": azure("gpt-4o-mini"),
+    "block-model": azure("gpt-4o-mini")
   },
   // imageModels: {
   //   "small-model": azure.image("dall-e-2"),
@@ -57,4 +59,15 @@ export const chatModels: Array<ChatModel> = [
     name: "O3-Mini (High)",
     description: "A model with high reasoning effort for more complex tasks.",
   },
+  {
+    id: "gpt-4o-mini",
+    name: "GPT-4o-Mini",
+    description: "A lightweight model with low reasoning effort.",
+  },
+  {
+    id: "gpt-4o",
+    name: "GPT-4o",
+    description: "A model with blablabla.",
+  },
+  
 ];
