@@ -45,29 +45,28 @@ interface ChatModel {
 
 export const chatModels: Array<ChatModel> = [
   {
+    id: "o3-mini-high",
+    name: "o3-Mini (High)",
+    description: "The primary model for coding tasks.",
+  },
+  {
     id: "o1",
-    name: "O1",
-    description: "The primary model (o1) for general-purpose tasks.",
+    name: "o1",
+    description: "A reasoning model.",
   },
   {
     id: "o3-mini-low",
-    name: "O3-Mini (Low)",
-    description: "A lightweight model with low reasoning effort.",
-  },
-  {
-    id: "o3-mini-high",
-    name: "O3-Mini (High)",
-    description: "A model with high reasoning effort for more complex tasks.",
-  },
-  {
-    id: "gpt-4o-mini",
-    name: "GPT-4o-Mini",
-    description: "A lightweight model with low reasoning effort.",
+    name: "o3-Mini (Low)",
+    description: "A lightweight reasoning model.",
   },
   {
     id: "gpt-4o",
     name: "GPT-4o",
-    description: "A model with blablabla.",
+    description: "A general-purpose model.",
   },
-  
+  {
+    id: "gpt-4o-mini",
+    name: "GPT-4o-Mini",
+    description: "A lightweight general-purpose model.",
+  },
 ];
