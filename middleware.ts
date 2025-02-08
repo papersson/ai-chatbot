@@ -1,9 +1,32 @@
-import NextAuth from 'next-auth';
+import { auth } from "@/app/(auth)/auth"
+import { NextResponse } from "next/server"
 
-import { authConfig } from '@/app/(auth)/auth.config';
+export default auth((req) => {
+  const isLoggedIn = !!req.auth
+  const { nextUrl } = req
 
-export default NextAuth(authConfig).auth;
+  // If the user is not logged in and trying to access a protected route,
+  // redirect them to the signin page
+  if (!isLoggedIn) {
+    return NextResponse.redirect(new URL("/login", nextUrl))
+  }
 
+  // Allow logged-in users to access protected routes
+  return NextResponse.next()
+})
+
+// MATCHER CONFIG
 export const config = {
-  matcher: ['/', '/:id', '/api/:path*', '/login', '/register'],
-};
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - signin (auth page)
+     * - public (public files)
+     */
+    "/((?!api|_next/static|_next/image|favicon.ico|signin|login|public).*)",
+  ],
+}

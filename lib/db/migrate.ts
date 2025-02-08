@@ -4,7 +4,7 @@ import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import postgres from 'postgres';
 
 config({
-  path: '.env.local',
+  path: '.env',
 });
 
 const runMigrate = async () => {
@@ -12,8 +12,9 @@ const runMigrate = async () => {
     throw new Error('POSTGRES_URL is not defined');
   }
 
-  const connection = postgres(process.env.POSTGRES_URL, { max: 1 });
-  const db = drizzle(connection);
+  // Use a separate connection with max: 1 for migrations
+  const migrationConnection = postgres(process.env.POSTGRES_URL, { max: 1 });
+  const db = drizzle(migrationConnection);
 
   console.log('⏳ Running migrations...');
 

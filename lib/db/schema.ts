@@ -1,4 +1,5 @@
 import type { InferSelectModel } from 'drizzle-orm';
+import type { AdapterAccountType } from "next-auth/adapters";
 import {
   pgTable,
   varchar,
@@ -9,22 +10,72 @@ import {
   primaryKey,
   foreignKey,
   boolean,
+  integer,
 } from 'drizzle-orm/pg-core';
 import { blockKinds } from '../blocks/server';
 
-export const user = pgTable('User', {
-  id: uuid('id').primaryKey().notNull().defaultRandom(),
-  email: varchar('email', { length: 64 }).notNull(),
+export const user = pgTable('user', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  email: varchar('email', { length: 64 }).notNull().unique(),
   password: varchar('password', { length: 64 }),
+  name: text('name'),
+  emailVerified: timestamp('emailVerified', { mode: 'date' }),
+  image: text('image'),
 });
 
 export type User = InferSelectModel<typeof user>;
 
-export const chat = pgTable('Chat', {
-  id: uuid('id').primaryKey().notNull().defaultRandom(),
+export const account = pgTable(
+  'account',
+  {
+    userId: text('userId')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    type: text('type').$type<AdapterAccountType>().notNull(),
+    provider: text('provider').notNull(),
+    providerAccountId: text('providerAccountId').notNull(),
+    refresh_token: text('refresh_token'),
+    access_token: text('access_token'),
+    expires_at: integer('expires_at'),
+    token_type: text('token_type'),
+    scope: text('scope'),
+    id_token: text('id_token'),
+    session_state: text('session_state'),
+  },
+  (account) => ({
+    compoundKey: primaryKey({
+      columns: [account.provider, account.providerAccountId],
+    }),
+  })
+);
+
+export const session = pgTable('session', {
+  sessionToken: text('sessionToken').primaryKey(),
+  userId: text('userId')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  expires: timestamp('expires', { mode: 'date' }).notNull(),
+});
+
+export const verificationToken = pgTable(
+  'verification_token',
+  {
+    identifier: text('identifier').notNull(),
+    token: text('token').notNull(),
+    expires: timestamp('expires', { mode: 'date' }).notNull(),
+  },
+  (vt) => ({
+    compoundKey: primaryKey({
+      columns: [vt.identifier, vt.token],
+    }),
+  })
+);
+
+export const chat = pgTable('chat', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
   createdAt: timestamp('createdAt').notNull(),
   title: text('title').notNull(),
-  userId: uuid('userId')
+  userId: text('userId')
     .notNull()
     .references(() => user.id),
   visibility: varchar('visibility', { enum: ['public', 'private'] })
@@ -34,9 +85,9 @@ export const chat = pgTable('Chat', {
 
 export type Chat = InferSelectModel<typeof chat>;
 
-export const message = pgTable('Message', {
-  id: uuid('id').primaryKey().notNull().defaultRandom(),
-  chatId: uuid('chatId')
+export const message = pgTable('message', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  chatId: text('chatId')
     .notNull()
     .references(() => chat.id),
   role: varchar('role').notNull(),
@@ -47,12 +98,12 @@ export const message = pgTable('Message', {
 export type Message = InferSelectModel<typeof message>;
 
 export const vote = pgTable(
-  'Vote',
+  'vote',
   {
-    chatId: uuid('chatId')
+    chatId: text('chatId')
       .notNull()
       .references(() => chat.id),
-    messageId: uuid('messageId')
+    messageId: text('messageId')
       .notNull()
       .references(() => message.id),
     isUpvoted: boolean('isUpvoted').notNull(),
@@ -67,16 +118,16 @@ export const vote = pgTable(
 export type Vote = InferSelectModel<typeof vote>;
 
 export const document = pgTable(
-  'Document',
+  'document',
   {
-    id: uuid('id').notNull().defaultRandom(),
+    id: text('id').notNull().$defaultFn(() => crypto.randomUUID()),
     createdAt: timestamp('createdAt').notNull(),
     title: text('title').notNull(),
     content: text('content'),
     kind: varchar('text', { enum: ['text', 'code', 'image', 'sheet'] })
       .notNull()
       .default('text'),
-    userId: uuid('userId')
+    userId: text('userId')
       .notNull()
       .references(() => user.id),
   },
@@ -90,16 +141,16 @@ export const document = pgTable(
 export type Document = InferSelectModel<typeof document>;
 
 export const suggestion = pgTable(
-  'Suggestion',
+  'suggestion',
   {
-    id: uuid('id').notNull().defaultRandom(),
-    documentId: uuid('documentId').notNull(),
+    id: text('id').notNull().$defaultFn(() => crypto.randomUUID()),
+    documentId: text('documentId').notNull(),
     documentCreatedAt: timestamp('documentCreatedAt').notNull(),
     originalText: text('originalText').notNull(),
     suggestedText: text('suggestedText').notNull(),
     description: text('description'),
     isResolved: boolean('isResolved').notNull().default(false),
-    userId: uuid('userId')
+    userId: text('userId')
       .notNull()
       .references(() => user.id),
     createdAt: timestamp('createdAt').notNull(),
